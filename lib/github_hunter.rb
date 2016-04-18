@@ -9,23 +9,33 @@ class GithubHunter
     @client = Octokit::Client.new(:access_token => ENV['GITHUB_API_TOKEN'])
   end
 
-  def get_total_count
+  # get total count result of search users 
+  # @return [integer]
+  def total_count
     users = @client.search_users('language:ruby location:Vietnam')
     return  users.total_count
   end
 
-  def get_users(total_count)
+  # get login ids
+  # @param [total_count] integer
+  # @return [array]
+  def login_ids(total_count)
+    login_ids = []
     pages = total_count/100+1
-
-    i = 0
     (1..pages).each do |page|
-      puts page
       users = @client.search_users('language:ruby location:Vietnam', {:page => page, :per_page => 100})
       users.items.each do |user|
-        #pp user.html_url
-        puts i += 1
+        login_ids.push(user.login)
       end
     end
+    return login_ids
   end 
+
+  # get user information
+  # @return [object]
+  def user(login_id)
+    user = @client.user login_id
+    return user
+  end
 end
 
